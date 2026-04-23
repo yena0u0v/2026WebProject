@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.nuclear.mapper.NewsMapper">
+
+    <!-- 기본 뉴스 목록 -->
+    <select id="selectAllArticles" resultType="com.project.nuclear.model.NewsArticle">
+        SELECT * FROM news_article ORDER BY published_date DESC
+    </select>
+
+    <!-- 시계열 분석: 연도 × 키워드 × 이벤트 단계 -->
+    <select id="selectTimeSeriesAnalysis" resultType="map">
+        SELECT
+            YEAR(a.published_date)  AS year,
+            k.keyword               AS keyword,
+            ne.period_stage         AS periodStage,
+            SUM(ak.frequency)       AS totalCount
+        FROM news_article a
+                 JOIN article_keyword_map ak ON a.article_id = ak.article_id
+                 JOIN keyword_dictionary  k  ON ak.keyword_id = k.keyword_id
+                 JOIN news_event_map      nem ON a.article_id = nem.article_id
+                 JOIN nuclear_event       ne  ON nem.event_id  = ne.event_id
+        GROUP BY YEAR(a.published_date), k.keyword, ne.period_stage
+        ORDER BY year, ne.period_stage
+    </select>
+
+    <!-- 키워드 빈도 분석 (frequency 기반, 내림차순) -->
+    <select id="selectKeywordFreq" resultType="map">
+        SELECT
+            k.keyword               AS keyword,
+            k.category              AS category,
+            SUM(ak.frequency)       AS frequency
+        FROM keyword_dictionary k
+                 JOIN article_keyword_map ak ON k.keyword_id = ak.keyword_id
+        GROUP BY k.keyword_id, k.keyword, k.category
+        ORDER BY frequency DESC
+    </select>
+
+    <!-- TF-IDF 키워드 중요도 분석 -->
+    <select id="selectKeywordTfidf" resultType="map">
+        SELECT
+            k.keyword               AS keyword,
+            k.category              AS category,
+            k.tfidf_score           AS tfidfScore
+        FROM keyword_dictionary k
+        WHERE k.tfidf_score IS NOT NULL
+          AND k.tfidf_score > 0
+        ORDER BY k.tfidf_score DESC
+        LIMIT 20
+    </select>
+
+</mapper>
