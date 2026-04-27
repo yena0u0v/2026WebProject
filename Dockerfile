@@ -1,5 +1,5 @@
 # 1. 빌드
-FROM gradle:8.5-jdk17 AS build
+FROM gradle:8.14-jdk17 AS build
 WORKDIR /app
 COPY . .
 RUN gradle build -x test
@@ -13,3 +13,5 @@ COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+
