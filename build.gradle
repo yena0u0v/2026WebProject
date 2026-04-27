@@ -25,17 +25,15 @@ dependencies {
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
 
-    // DB & MyBatis (Boot 4.0 대응 버전)
+    // DB & MyBatis
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.0.1'
     runtimeOnly 'com.mysql:mysql-connector-j'
 
-    // Security & JWT
+    // Security, JWT, Utils
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
-
-    // Utils
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -48,7 +46,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-// [중요] JSP 파일을 JAR 내부에 포함시키는 설정
+// [핵심] JSP 파일들을 JAR 파일의 리소스 경로로 강제 복사
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from('src/main/webapp') {
