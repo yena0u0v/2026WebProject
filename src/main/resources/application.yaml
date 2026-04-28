@@ -1,5 +1,7 @@
 server:
-  port: ${PORT}
+  address: 0.0.0.0
+  port: ${PORT:8080}
+  forward-headers-strategy: native
 
 spring:
   datasource:
@@ -14,6 +16,10 @@ spring:
       suffix: .jsp
 
   web:
+    error:
+      path: /error
+      whitelabel:
+        enabled: false
     resources:
       static-locations: classpath:/static/, /
 

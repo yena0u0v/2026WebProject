@@ -38,3 +38,4 @@ public class NewsController {
         return "OK";
     }
 }
+
