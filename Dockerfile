@@ -13,7 +13,7 @@ WORKDIR /app
 # 빌드된 JAR 파일만 실행 서버로 복사
 COPY --from=build /app/build/libs/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 10000
 
 # JSP 인식을 위한 엔트로피 옵션 추가
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
