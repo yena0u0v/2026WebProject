@@ -1,13 +1,11 @@
 server:
-  address: 0.0.0.0
   port: ${PORT:8080}
-  forward-headers-strategy: native
 
 spring:
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/test?serverTimezone=Asia/Seoul&useSSL=false
+    username: YOUR_USERNAME
+    password: YOUR_PASSWORD
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mvc:
@@ -15,16 +13,6 @@ spring:
       prefix: /WEB-INF/views/
       suffix: .jsp
 
-  web:
-    error:
-      path: /error
-      whitelabel:
-        enabled: false
-    resources:
-      static-locations: classpath:/static/, /
-
 mybatis:
-  mapper-locations: classpath:mappers/**/*.xml
+  mapper-locations: classpath:/mappers/*.xml
   type-aliases-package: com.project.nuclear.model
-  configuration:
-    map-underscore-to-camel-case: true
