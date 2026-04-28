@@ -39,12 +39,13 @@
         ORDER BY frequency DESC
     </select>
 
-    <!-- TF-IDF 분석 (🔥 이름만 다르고 구조 유지) -->
+    <!-- TF-IDF 분석 (최종) -->
     <select id="selectKeywordTfidf" resultType="map">
         SELECT
             k.keyword              AS keyword,
             k.category             AS category,
-            SUM(ak.tf_idf)         AS tfidf
+            SUM(ak.tfidf_score)    AS tfidf,
+            SUM(ak.frequency)      AS frequency
         FROM keyword_dictionary k
                  JOIN article_keyword_map ak ON k.keyword_id = ak.keyword_id
         GROUP BY k.keyword_id, k.keyword, k.category
