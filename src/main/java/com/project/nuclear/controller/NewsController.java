@@ -3,10 +3,10 @@ package com.project.nuclear.controller;
 import com.project.nuclear.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 @Controller
 @RequiredArgsConstructor
@@ -14,38 +14,55 @@ public class NewsController {
 
     private final NewsService newsService;
 
-    /** 🔥 메인 페이지 — DB 호출 절대 금지 */
+    /** ✅ 메인 (SSR 유지, 절대 안 죽는 구조) */
     @GetMapping("/")
-    public String index() {
-        return "index"; // JSP만 렌더링
-    }
-
-    /** 🔥 데이터 API (여기서만 DB 접근) */
-    @GetMapping("/api/data")
-    @ResponseBody
-    public Map<String, Object> data() {
-
-        Map<String, Object> map = new HashMap<>();
+    public String index(Model model) {
 
         try {
-            map.put("articles", newsService.getAllArticles());
-            map.put("timeSeriesData", newsService.getTimeSeriesData());
-            map.put("keywordFreq", newsService.getKeywordFreq());
-            map.put("keywordTfidf", newsService.getKeywordTfidf());
+            model.addAttribute("articles", newsService.getAllArticles());
+            model.addAttribute("timeSeriesData", newsService.getTimeSeriesData());
+            model.addAttribute("keywordFreq", newsService.getKeywordFreq());
+            model.addAttribute("keywordTfidf", newsService.getKeywordTfidf());
         } catch (Exception e) {
             e.printStackTrace();
 
-            // 🔥 절대 null 방지
-            map.put("articles", new Object[]{});
-            map.put("timeSeriesData", new Object[]{});
-            map.put("keywordFreq", new Object[]{});
-            map.put("keywordTfidf", new Object[]{});
+            // 🔥 핵심: 절대 null 금지 → emptyList
+            model.addAttribute("articles", Collections.emptyList());
+            model.addAttribute("timeSeriesData", Collections.emptyList());
+            model.addAttribute("keywordFreq", Collections.emptyList());
+            model.addAttribute("keywordTfidf", Collections.emptyList());
+
+            model.addAttribute("error", "DB 연결 지연 또는 실패");
         }
 
-        return map;
+        return "index";
     }
 
-    /** 🔥 Render Health Check */
+    /** 시계열 */
+    @GetMapping("/analysis/timeseries")
+    public String timeseries(Model model) {
+        try {
+            model.addAttribute("timeSeriesData", newsService.getTimeSeriesData());
+        } catch (Exception e) {
+            model.addAttribute("timeSeriesData", Collections.emptyList());
+        }
+        return "analysis/timeseries";
+    }
+
+    /** 키워드 */
+    @GetMapping("/analysis/keyword")
+    public String keyword(Model model) {
+        try {
+            model.addAttribute("keywordFreq", newsService.getKeywordFreq());
+            model.addAttribute("keywordTfidf", newsService.getKeywordTfidf());
+        } catch (Exception e) {
+            model.addAttribute("keywordFreq", Collections.emptyList());
+            model.addAttribute("keywordTfidf", Collections.emptyList());
+        }
+        return "analysis/keyword";
+    }
+
+    /** ✅ Render 헬스 체크 (필수) */
     @GetMapping("/health")
     @ResponseBody
     public String health() {

@@ -1,5 +1,11 @@
+<c:if test="${not empty error}">
+    <div class="alert alert-warning text-center">
+            ${error}
+    </div>
+</c:if>
+
 <script>
-    /* 🔥 서버 대신 API로 데이터 로딩 */
+           /* 🔥 서버 대신 API로 데이터 로딩 */
     fetch('/api/data')
         .then(res => res.json())
         .then(data => {
