@@ -6,7 +6,6 @@ plugins {
 
 group = 'com.project'
 version = '0.0.1-SNAPSHOT'
-description = 'NUCLEAR.March.ver'
 
 java {
     toolchain {
@@ -19,34 +18,26 @@ repositories {
 }
 
 dependencies {
-    // Web & JSP Engine
+    // 🔥 Web (Controller, GetMapping 필수)
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 🔥 JSP (필수)
     implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
 
-    // DB & MyBatis
+    // 🔥 DB + MyBatis
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.0.1'
     runtimeOnly 'com.mysql:mysql-connector-j'
 
-    // Security, JWT, Utils
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    // 🔥 Lombok (RequiredArgsConstructor 오류 해결 핵심)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // Test
+    // 🔥 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:4.0.1'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-// [핵심] JSP 파일들을 JAR 파일의 리소스 경로로 강제 복사
 bootJar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from('src/main/webapp') {
