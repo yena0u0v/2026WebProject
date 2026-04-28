@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-class NewsServiceImpl implements NewsService {
+public class NewsServiceImpl implements NewsService {
 
     private final NewsMapper newsMapper;
 
@@ -21,30 +21,16 @@ class NewsServiceImpl implements NewsService {
 
     @Override
     public List<Map<String, Object>> getTimeSeriesData() {
-        try {
-            return newsMapper.selectTimeSeriesAnalysis();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return List.of(); // 🔥 절대 null 금지
-        }
+        return newsMapper.selectTimeSeriesAnalysis();
     }
 
     @Override
     public List<Map<String, Object>> getKeywordFreq() {
-        try {
-            return newsMapper.selectKeywordFreq();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return List.of();
-        }
+        return newsMapper.selectKeywordFreq();
     }
 
     @Override
     public List<Map<String, Object>> getKeywordTfidf() {
-        try {
-            return newsMapper.selectKeywordTfidf();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return List.of();
-        }
+        return newsMapper.selectKeywordTfidf();
     }
+}
