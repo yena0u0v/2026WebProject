@@ -4,7 +4,9 @@
 
     <!-- 기본 뉴스 목록 -->
     <select id="selectAllArticles" resultType="com.project.nuclear.model.NewsArticle">
-        SELECT * FROM news_article ORDER BY published_date DESC
+        SELECT *
+        FROM news_article
+        ORDER BY published_date DESC
     </select>
 
     <!-- 시계열 분석: 연도 × 키워드 × 이벤트 단계 -->
@@ -20,10 +22,10 @@
                  JOIN news_event_map      nem ON a.article_id = nem.article_id
                  JOIN nuclear_event       ne  ON nem.event_id  = ne.event_id
         GROUP BY YEAR(a.published_date), k.keyword, ne.period_stage
-        ORDER BY year, ne.period_stage
+        ORDER BY year ASC, ne.period_stage ASC
     </select>
 
-    <!-- 키워드 빈도 분석 (frequency 기반, 내림차순) -->
+    <!-- 키워드 빈도 분석 -->
     <select id="selectKeywordFreq" resultType="map">
         SELECT
             k.keyword               AS keyword,
@@ -35,16 +37,18 @@
         ORDER BY frequency DESC
     </select>
 
-    <!-- TF-IDF 키워드 중요도 분석 -->
+    <!-- TF-IDF 키워드 중요도 분석 (최종 수정) -->
     <select id="selectKeywordTfidf" resultType="map">
         SELECT
             k.keyword               AS keyword,
             k.category              AS category,
-            k.tfidf_score           AS tfidfScore
+            AVG(ak.tfidf_score)     AS tfidfScore,
+            SUM(ak.frequency)       AS totalFreq
         FROM keyword_dictionary k
-        WHERE k.tfidf_score IS NOT NULL
-          AND k.tfidf_score > 0
-        ORDER BY k.tfidf_score DESC
+                 JOIN article_keyword_map ak ON k.keyword_id = ak.keyword_id
+        GROUP BY k.keyword_id, k.keyword, k.category
+        HAVING tfidfScore > 0
+        ORDER BY tfidfScore DESC
         LIMIT 20
     </select>
 
