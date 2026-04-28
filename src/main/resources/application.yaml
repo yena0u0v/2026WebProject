@@ -1,7 +1,6 @@
 server:
+  port: ${PORT}
   address: 0.0.0.0
-  port: ${PORT:8080}
-  forward-headers-strategy: native
 
 spring:
   datasource:
