@@ -21,19 +21,30 @@ class NewsServiceImpl implements NewsService {
 
     @Override
     public List<Map<String, Object>> getTimeSeriesData() {
-        return newsMapper.selectTimeSeriesAnalysis();
+        try {
+            return newsMapper.selectTimeSeriesAnalysis();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of(); // 🔥 절대 null 금지
+        }
     }
 
     @Override
     public List<Map<String, Object>> getKeywordFreq() {
-        return newsMapper.selectKeywordFreq();
+        try {
+            return newsMapper.selectKeywordFreq();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
     }
 
     @Override
     public List<Map<String, Object>> getKeywordTfidf() {
-        return newsMapper.selectKeywordTfidf();
+        try {
+            return newsMapper.selectKeywordTfidf();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
     }
-}
-
-
-

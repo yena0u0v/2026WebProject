@@ -12,17 +12,17 @@
     <!-- 시계열 분석: 연도 × 키워드 × 이벤트 단계 -->
     <select id="selectTimeSeriesAnalysis" resultType="map">
         SELECT
-            YEAR(a.published_date)  AS year,
-            k.keyword               AS keyword,
-            ne.period_stage         AS periodStage,
-            SUM(ak.frequency)       AS totalCount
+            YEAR(a.published_date) AS year,
+            COALESCE(k.keyword, 'UNKNOWN') AS keyword,
+            COALESCE(ne.period_stage, 'NONE') AS periodStage,
+            COALESCE(SUM(ak.frequency), 0) AS totalCount
         FROM news_article a
-                 JOIN article_keyword_map ak ON a.article_id = ak.article_id
-                 JOIN keyword_dictionary  k  ON ak.keyword_id = k.keyword_id
-                 JOIN news_event_map      nem ON a.article_id = nem.article_id
-                 JOIN nuclear_event       ne  ON nem.event_id  = ne.event_id
+                 LEFT JOIN article_keyword_map ak ON a.article_id = ak.article_id
+                 LEFT JOIN keyword_dictionary k ON ak.keyword_id = k.keyword_id
+                 LEFT JOIN news_event_map nem ON a.article_id = nem.article_id
+                 LEFT JOIN nuclear_event ne ON nem.event_id = ne.event_id
         GROUP BY YEAR(a.published_date), k.keyword, ne.period_stage
-        ORDER BY year ASC, ne.period_stage ASC
+        ORDER BY year ASC
     </select>
 
     <!-- 키워드 빈도 분석 -->
@@ -38,18 +38,20 @@
     </select>
 
     <!-- TF-IDF 키워드 중요도 분석 (최종 수정) -->
-    <select id="selectKeywordTfidf" resultType="map">
+    <select id="selectTimeSeriesAnalysis" resultType="map">
         SELECT
-            k.keyword               AS keyword,
-            k.category              AS category,
-            AVG(ak.tfidf_score)     AS tfidfScore,
-            SUM(ak.frequency)       AS totalFreq
-        FROM keyword_dictionary k
-                 JOIN article_keyword_map ak ON k.keyword_id = ak.keyword_id
-        GROUP BY k.keyword_id, k.keyword, k.category
-        HAVING tfidfScore > 0
-        ORDER BY tfidfScore DESC
-        LIMIT 20
+            YEAR(a.published_date) AS year,
+            COALESCE(k.keyword, 'UNKNOWN') AS keyword,
+            COALESCE(ne.period_stage, 'NONE') AS periodStage,
+            COALESCE(SUM(ak.frequency), 0) AS totalCount
+        FROM news_article a
+                 LEFT JOIN article_keyword_map ak ON a.article_id = ak.article_id
+                 LEFT JOIN keyword_dictionary k ON ak.keyword_id = k.keyword_id
+                 LEFT JOIN news_event_map nem ON a.article_id = nem.article_id
+                 LEFT JOIN nuclear_event ne ON nem.event_id = ne.event_id
+        GROUP BY YEAR(a.published_date), k.keyword, ne.period_stage
+        ORDER BY year ASC
     </select>
+    <!-- Mapper “절대 안 죽는 버전” 위해 INNER JOIN → LEFT JOIN으로 전부 변경 -->
 
 </mapper>

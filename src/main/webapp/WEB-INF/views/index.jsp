@@ -1,105 +1,75 @@
-<body class="bg-light">
-
-<nav class="navbar navbar-dark bg-dark px-4 py-3 mb-4">
-    <span class="navbar-brand fw-bold fs-5">Nuclear Policy Analysis System</span>
-</nav>
-
-<div class="container-fluid px-4">
-
-    <!-- 요약 카드 -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card text-white" style="background:#2563eb">
-                <div class="card-body py-3">
-                    <div class="small">Total Articles</div>
-                    <div id="totalArticles" class="fs-3 fw-bold">0</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 차트 -->
-    <div class="row g-3 mb-4">
-        <div class="col-lg-8">
-            <canvas id="timeSeriesChart"></canvas>
-        </div>
-        <div class="col-lg-4">
-            <canvas id="keywordChart"></canvas>
-        </div>
-    </div>
-
-    <!-- 뉴스 테이블 -->
-    <table class="table">
-        <thead>
-        <tr>
-            <th>제목</th>
-            <th>출처</th>
-            <th>점수</th>
-        </tr>
-        </thead>
-        <tbody id="articleTable"></tbody>
-    </table>
-
-</div>
-
 <script>
-    async function loadData() {
-        try {
-            const res = await fetch('/api/data');
-            const data = await res.json();
+    /* 🔥 서버 대신 API로 데이터 로딩 */
+    fetch('/api/data')
+        .then(res => res.json())
+        .then(data => {
 
-            /* ---------- 카드 ---------- */
-            document.getElementById('totalArticles').innerText = data.articles.length;
+            console.log("API DATA:", data);
 
-            /* ---------- 테이블 ---------- */
-            const tbody = document.getElementById('articleTable');
-            tbody.innerHTML = '';
-            data.articles.forEach(a => {
-                tbody.innerHTML += `
+            const articles = data.articles || [];
+            const timeSeriesData = data.timeSeriesData || [];
+            const keywordFreq = data.keywordFreq || [];
+            const keywordTfidf = data.keywordTfidf || [];
+
+            /* ---------- 요약 카드 ---------- */
+            document.querySelectorAll('.fs-3')[0].innerText = articles.length;
+            document.querySelectorAll('.fs-3')[1].innerText = keywordFreq.length;
+            document.querySelectorAll('.fs-3')[2].innerText = timeSeriesData.length;
+            document.querySelectorAll('.fs-3')[3].innerText = keywordTfidf.length;
+
+            /* ---------- 뉴스 테이블 ---------- */
+            const table = document.getElementById('articleTable');
+            table.innerHTML = '';
+
+            articles.forEach(a => {
+                const row = `
                 <tr>
-                    <td>${a.title}</td>
-                    <td>${a.source}</td>
-                    <td>${a.sentimentScore}</td>
+                    <td>${a.title || ''}</td>
+                    <td><span class="badge bg-secondary">${a.source || ''}</span></td>
+                    <td><span class="badge bg-info text-dark">${a.periodType || ''}</span></td>
+                    <td class="text-end">${a.sentimentScore ?? 0}</td>
+                    <td>${a.publishedDate || ''}</td>
                 </tr>
             `;
+                table.insertAdjacentHTML('beforeend', row);
             });
 
-            /* ---------- 차트 ---------- */
-            const ts = data.timeSeriesData;
+            /* ---------- Time Series Chart ---------- */
+            const years = [...new Set(timeSeriesData.map(d => d.year))].sort();
 
-            const years = [...new Set(ts.map(d => d.year))];
+            const keywords = [...new Set(timeSeriesData.map(d => d.keyword))].slice(0,5);
+
+            const datasets = keywords.map(kw => ({
+                label: kw,
+                data: years.map(y => {
+                    const row = timeSeriesData.find(d => d.year === y && d.keyword === kw);
+                    return row ? row.totalCount : 0;
+                })
+            }));
 
             new Chart(document.getElementById('timeSeriesChart'), {
                 type: 'line',
-                data: {
-                    labels: years,
-                    datasets: [{
-                        label: 'Count',
-                        data: years.map(y => {
-                            return ts.filter(t => t.year === y)
-                                .reduce((sum, v) => sum + v.totalCount, 0);
-                        })
-                    }]
-                }
+                data: { labels: years, datasets: datasets }
             });
 
-            const kw = data.keywordFreq.slice(0,10);
+            /* ---------- Keyword Chart ---------- */
+            const top10 = keywordFreq.slice(0,10);
 
             new Chart(document.getElementById('keywordChart'), {
                 type: 'bar',
                 data: {
-                    labels: kw.map(k => k.keyword),
+                    labels: top10.map(d => d.keyword),
                     datasets: [{
-                        data: kw.map(k => k.frequency)
+                        data: top10.map(d => d.frequency)
                     }]
                 }
             });
 
-        } catch (e) {
-            console.error("🔥 데이터 로딩 실패", e);
-            document.body.innerHTML += "<h3>데이터 로딩 실패</h3>";
-        }
-    }
+        })
+        .catch(err => {
+            console.error("API ERROR:", err);
 
-    loadData();
+            document.body.innerHTML =
+                "<h2 style='padding:20px;color:red;'>데이터 로딩 실패 (서버는 살아있음)</h2>";
+        });
 </script>
